@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="pt-BR" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karasuhon - Biblioteca Online Wattpad Style</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .text-sm-custom { font-size: 0.875rem; }
+        .text-base-custom { font-size: 1rem; }
+        .text-lg-custom { font-size: 1.125rem; }
+        /* Esconder barra de rolagem mantendo funcionalidade */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-100 flex justify-center items-center min-h-screen font-sans text-slate-800">
+
+    <!-- Container do Celular -->
+    <div id="app-container" class="w-full max-w-md h-[880px] bg-white shadow-2xl rounded-3xl overflow-hidden flex flex-col relative border-4 border-slate-800 text-sm-custom">
+        
+        <!-- STATUS BAR -->
+        <div class="bg-slate-900 text-white px-6 py-2 flex justify-between items-center text-xs z-50">
+            <span id="clock">9:41</span>
+            <div class="space-x-1 flex items-center">
+                <span id="lang-indicator" class="text-[10px] bg-indigo-600 px-1.5 py-0.5 rounded uppercase font-bold">PT</span>
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-full"></i>
+            </div>
+        </div>
+
+        <!-- TELA DE LOGIN / CONFIRMAÇÃO DE IDADE -->
+        <div id="login-screen" class="flex-1 p-6 flex flex-col justify-center bg-gradient-to-br from-indigo-900 to-slate-900 text-white">
+            <div class="text-center mb-6">
+                <div class="bg-indigo-600 w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold mb-3 shadow-lg shadow-indigo-500/50">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-wide">Karasuhon</h1>
+                <p class="text-indigo-200 text-xs mt-1">Biblioteca Online CETAM[cite: 2]</p>
+            </div>
+
+            <div class="space-y-3 bg-white/10 p-5 rounded-2xl backdrop-blur-md border border-white/10">
+                <div>
+                    <label class="text-[11px] font-semibold uppercase text-indigo-200">Nome de Usuário</label>
+                    <input type="text" id="login-user" placeholder="Ex: Ana Luiza" class="w-full mt-1 px-3.5 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 text-sm">
+                </div>
+                
+                <!-- Confirmação de Idade -->
+                <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="check-maior18" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 bg-slate-900 border-slate-700">
+                    <label for="check-maior18" class="text-xs text-indigo-100 cursor-pointer">Confirmo que tenho **18 anos ou mais** (Acesso a conteúdos +18)</label>
+                </div>
+
+                <button onclick="fazerLogin()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold transition shadow-lg shadow-indigo-600/30 mt-2 text-white">
+                    Entrar na Comunidade
+                </button>
+            </div>
+            <p class="text-center text-[10px] text-slate-400 mt-4">Descubra e empreste livros físicos de leitores próximos[cite: 3, 4]!</p>
+        </div>
+
+        <!-- APLICATIVO PRINCIPAL -->
+        <div id="app-screen" class="flex-1 flex flex-col bg-slate-50 hidden overflow-hidden relative">
+            
+            <!-- Header Superior -->
+            <div class="bg-white px-5 py-3 border-b border-slate-200 flex justify-between items-center z-10">
+                <div class="flex items-center space-x-2">
+                    <div id="user-avatar-mini" class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs overflow-hidden">
+                        <span id="mini-avatar-text">AL</span>
+                        <img id="mini-avatar-img" class="w-full h-full object-cover hidden" alt="Avatar">
+                    </div>
+                    <div>
+                        <h2 id="header-username" class="font-bold text-slate-800 text-xs leading-tight">Usuário</h2>
+                        <span class="text-[10px] text-emerald-600 font-medium flex items-center"><i class="fa-solid fa-location-dot mr-1"></i> Manaus, AM[cite: 1]</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="abrirConfiguracoes()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg text-xs" title="Configurações">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                    <button onclick="sair()" class="text-xs text-red-500 font-semibold bg-red-50 px-2.5 py-1.5 rounded-lg hover:bg-red-100">
+                        Sair
+                    </button>
+                </div>
+            </div>
+
+            <!-- CONTEÚDO DAS ABAS -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-24" id="main-scroll-area">
+                
+                <!-- ABA 1: ACERVO & BUSCA -->
+                <div id="tab-acervo" class="space-y-4">
+                    <!-- Filtro de Categorias / Áreas -->
+                    <div class="flex space-x-2 overflow-x-auto pb-1 text-xs no-scrollbar">
+                        <button onclick="filtrarCategoria('Todos')" class="cat-btn px-3 py-1.5 rounded-full bg-indigo-600 text-white font-medium whitespace-nowrap shadow-sm">Todos</button>
+                        <button onclick="filtrarCategoria('Livros')" class="cat-btn px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 font-medium whitespace-nowrap">Livros</button>
+                        <button onclick="filtrarCategoria('Acadêmico')" class="cat-btn px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 font-medium whitespace-nowrap">Acadêmico</button>
+                        <button onclick="filtrarCategoria('Mangá')" class="cat-btn px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 font-medium whitespace-nowrap">Mangá</button>
+                        <button onclick="filtrarCategoria('Quadrinhos')" class="cat-btn px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 font-medium whitespace-nowrap">Quadrinhos</button>
+                    </div>
+
+                    <!-- Barra de Pesquisa e Proximidade -->
+                    <div class="flex space-x-2">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                            <input type="text" id="search-input" onkeyup="renderizarAcervo()" placeholder="Pesquisar título, autor ou tags..." class="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 shadow-sm">
+                        </div>
+                        <button onclick="alternarProximidade()" id="btn-proximidade" class="px-3 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold flex items-center space-x-1 hover:bg-slate-50 shadow-sm" title="Filtrar por livros próximos">
+                            <i class="fa-solid fa-location-crosshairs text-indigo-600"></i>
+                            <span class="hidden sm:inline">Próximos</span>
+                        </button>
+                    </div>
+
+                    <!-- Lista de Livros -->
+                    <div id="lista-acervo" class="space-y-3"></div>
+                </div>
+
+                <!-- ABA 2: MEUS EMPRÉSTIMOS E RESERVAS -->
+                <div id="tab-emprestimos" class="hidden space-y-4">
+                    <h3 class="font-bold text-slate-800 text-sm">Meus Empréstimos Ativos</h3>
+                    <div id="lista-meus-emprestimos" class="space-y-3"></div>
+
+                    <h3 class="font-bold text-slate-800 text-sm pt-2">Minhas Reservas & Fila de Espera</h3>
+                    <div id="lista-minhas-reservas" class="space-y-3"></div>
+                </div>
+
+                <!-- ABA 3: CHAT DE ENTREGA -->
+                <div id="tab-chat" class="hidden flex flex-col h-[520px] bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-slate-900 text-white p-3 flex justify-between items-center text-xs">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center font-bold">RT</div>
+                            <div>
+                                <span class="font-bold">Renann Teylon (Doador)</span>
+                                <span class="block text-[9px] text-emerald-400">Online - Combinando entrega física</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-shield-halved text-indigo-400"></i>
+                    </div>
+                    <div id="chat-messages" class="flex-1 p-3 space-y-3 overflow-y-auto text-xs bg-slate-50">
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200 max-w-[80%] shadow-sm">
+                            <p class="font-bold text-indigo-600 text-[10px]">Renann:</p>
+                            <p>Olá! Tudo bem? Podemos combinar a entrega do livro físico na escola CETAM[cite: 1] amanhã às 14h?</p>
+                            <span class="text-[9px] text-slate-400 block mt-1 text-right">09:30</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-white border-t border-slate-200 flex space-x-2">
+                        <input type="text" id="chat-input" placeholder="Digite onde encontrar..." class="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500">
+                        <button onclick="enviarMensagem()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-500">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ABA 4: CADASTRAR / DOAR LIVRO -->
+                <div id="tab-doar" class="hidden space-y-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 text-sm">Disponibilizar Novo Livro</h3>
+                    <p class="text-xs text-slate-500">Dê utilidade ao livro parado em casa e compartilhe com a comunidade[cite: 3]!</p>
+                    
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="font-medium text-slate-700">Título do Livro</label>
+                            <input type="text" id="novo-titulo" class="w-full mt-1 p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="font-medium text-slate-700">Autor</label>
+                            <input type="text" id="novo-autor" class="w-full mt-1 p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="font-medium text-slate-700">Área Principal</label>
+                                <select id="novo-categoria" class="w-full mt-1 p-2.5 border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-indigo-500">
+                                    <option value="Livros">Livros Gerais</option>
+                                    <option value="Acadêmico">Livro Acadêmico</option>
+                                    <option value="Mangá">Mangá</option>
+                                    <option value="Quadrinhos">Quadrinhos</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="font-medium text-slate-700">Faixa Etária</label>
+                                <select id="novo-faixa" class="w-full mt-1 p-2.5 border border-slate-200 rounded-xl bg-white focus:outline-none focus:border-indigo-500">
+                                    <option value="Livre">Livre</option>
+                                    <option value="12+">12 anos</option>
+                                    <option value="14+">14 anos</option>
+                                    <option value="16+">16 anos</option>
+                                    <option value="18+">+18 (Adulto)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Seleção de Tags (Até 5) + Criar Nova Tag -->
+                        <div>
+                            <label class="font-medium text-slate-700 block mb-1">Selecione até 5 Tags / Gêneros:</label>
+                            <div id="tag-selector-container" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                                <!-- Preenchido por JS -->
+                            </div>
+                            
+                            <!-- Criar tag nova -->
+                            <div class="flex mt-2 space-x-1">
+                                <input type="text" id="input-nova-tag" placeholder="Criar tag personalizada..." class="flex-1 p-2 border border-slate-200 rounded-xl text-xs">
+                                <button type="button" onclick="adicionarTagCustomizada()" class="px-3 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold">Adicionar Tag</button>
+                            </div>
+                            <span class="text-[10px] text-slate-400 mt-1 block" id="tag-counter">Selecionadas: 0 / 5</span>
+                        </div>
+
+                        <div>
+                            <label class="font-medium text-slate-700">Capa do Livro (Foto do dispositivo ou URL)</label>
+                            <div class="flex space-x-2 mt-1">
+                                <input type="text" id="novo-capa" placeholder="Cole o link da imagem ou selecione ao lado..." class="flex-1 p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 text-xs">
+                                <input type="file" id="file-capa-livro" accept="image/*" class="hidden" onchange="carregarCapaArquivo(event)">
+                                <button type="button" onclick="document.getElementById('file-capa-livro').click()" class="px-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold">
+                                    <i class="fa-solid fa-upload"></i> Foto
+                                </button>
+                            </div>
+                        </div>
+
+                        <button onclick="cadastrarLivro()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 shadow-md shadow-indigo-600/20">
+                            Publicar no Acervo Comunitário
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ABA 5: PERFIL E HISTÓRICO (Wattpad Style) -->
+                <div id="tab-perfil" class="hidden space-y-4">
+                    <!-- Banner & Foto -->
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                        <div id="perfil-banner" class="h-28 bg-gradient-to-r from-indigo-500 to-purple-600 bg-cover bg-center relative">
+                            <input type="file" id="file-banner" accept="image/*" class="hidden" onchange="mudarBannerArquivo(event)">
+                            <button onclick="document.getElementById('file-banner').click()" class="absolute right-2 top-2 bg-black/50 text-white px-2.5 py-1 rounded-lg text-[10px] backdrop-blur-sm font-medium"><i class="fa-solid fa-camera mr-1"></i>Trocar Banner</button>
+                        </div>
+                        <div class="px-4 pb-4 relative pt-1">
+                            <div class="flex justify-between items-end -mt-10 mb-2">
+                                <div class="relative">
+                                    <div id="perfil-avatar-container" class="w-16 h-16 rounded-2xl bg-indigo-700 text-white flex items-center justify-center font-bold text-xl border-4 border-white shadow-md overflow-hidden">
+                                        <span id="avatar-text">AL</span>
+                                        <img id="avatar-img" class="w-full h-full object-cover hidden" alt="Avatar">
+                                    </div>
+                                    <input type="file" id="file-avatar" accept="image/*" class="hidden" onchange="mudarAvatarArquivo(event)">
+                                    <button onclick="document.getElementById('file-avatar').click()" class="absolute -bottom-1 -right-1 bg-indigo-600 text-white w-6 h-6 rounded-full text-[10px] flex items-center justify-center shadow" title="Mudar Foto"><i class="fa-solid fa-camera"></i></button>
+                                </div>
+                                <button onclick="editarPerfil()" class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-semibold hover:bg-slate-50">Editar Perfil</button>
+                            </div>
+                            <h3 id="perfil-nome" class="font-bold text-slate-800 text-base">Nome de Usuário</h3>
+                            <p id="perfil-bio" class="text-xs text-slate-600 mt-1">Apaixonada por leitura, tecnologia e romances clássicos. Estudante CETAM[cite: 1, 2]!</p>
+                        </div>
+                    </div>
+
+                    <!-- Histórico Privado -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-indigo-600"><i class="fa-solid fa-lock mr-1"></i> Histórico Privado de Leitura</h4>
+                        <div id="historico-privado" class="space-y-2 text-xs">
+                            <!-- Preenchido por JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- MENU INFERIOR DE NAVEGAÇÃO -->
+            <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-2.5 px-4 flex justify-around items-center text-slate-400 z-20">
+                <button onclick="mudarTab('acervo')" id="nav-acervo" class="flex flex-col items-center text-indigo-600">
+                    <i class="fa-solid fa-book text-base"></i>
+                    <span class="text-[10px] mt-0.5 font-medium">Acervo</span>
+                </button>
+                <button onclick="mudarTab('emprestimos')" id="nav-emprestimos" class="flex flex-col items-center hover:text-indigo-600">
+                    <i class="fa-solid fa-clock-rotate-left text-base"></i>
+                    <span class="text-[10px] mt-0.5 font-medium">Empréstimos</span>
+                </button>
+                <button onclick="mudarTab('chat')" id="nav-chat" class="flex flex-col items-center hover:text-indigo-600 relative">
+                    <i class="fa-solid fa-comments text-base"></i>
+                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    <span class="text-[10px] mt-0.5 font-medium">Chat</span>
+                </button>
+                <button onclick="mudarTab('doar')" id="nav-doar" class="flex flex-col items-center hover:text-indigo-600">
+                    <i class="fa-solid fa-circle-plus text-base"></i>
+                    <span class="text-[10px] mt-0.5 font-medium">Doar</span>
+                </button>
+                <button onclick="mudarTab('perfil')" id="nav-perfil" class="flex flex-col items-center hover:text-indigo-600">
+                    <i class="fa-solid fa-user text-base"></i>
+                    <span class="text-[10px] mt-0.5 font-medium">Perfil</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- MODAL DE DETALHES DO LIVRO E AVALIAÇÕES (Wattpad Style) -->
+        <div id="book-modal" class="absolute inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm max-h-[85vh] rounded-3xl overflow-hidden flex flex-col shadow-2xl">
+                <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+                    <h3 class="font-bold text-sm">Detalhes da Obra</h3>
+                    <button onclick="fecharDetalhesLivro()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+                </div>
+                <div class="p-4 overflow-y-auto space-y-3 text-xs flex-1">
+                    <div class="flex space-x-3 items-center">
+                        <img id="modal-book-capa" src="" class="w-20 h-28 object-cover rounded-xl shadow-md border" alt="Capa">
+                        <div class="space-y-1 flex-1">
+                            <span id="modal-book-cat" class="text-[9px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded"></span>
+                            <h4 id="modal-book-titulo" class="font-bold text-slate-800 text-sm"></h4>
+                            <p id="modal-book-autor" class="text-slate-500"></p>
+                            <p id="modal-book-doador" class="text-slate-500 text-[11px]"></p>
+                            <div class="flex items-center space-x-1 pt-1">
+                                <i class="fa-solid fa-star text-amber-400"></i>
+                                <span id="modal-book-nota" class="font-bold"></span>
+                                <span id="modal-book-distancia" class="text-slate-400 ml-2"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="font-semibold text-slate-700 block mb-1">Tags:</span>
+                        <div id="modal-book-tags" class="flex flex-wrap gap-1"></div>
+                    </div>
+
+                    <div class="border-t pt-3">
+                        <h5 class="font-bold text-slate-800 mb-2">Avaliações da Comunidade:</h5>
+                        <div id="modal-book-reviews" class="space-y-2">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-50 border-t flex space-x-2">
+                    <button onclick="fecharDetalhesLivro()" class="flex-1 py-2.5 border rounded-xl font-semibold text-xs">Voltar</button>
+                    <button id="modal-book-action-btn" onclick="" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-xs shadow">Solicitar Empréstimo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE CONFIGURAÇÕES / ACESSIBILIDADE / IDIOMA -->
+        <div id="config-modal" class="absolute inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-xs rounded-2xl p-5 space-y-4 shadow-xl">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-gear mr-1 text-indigo-600"></i> Ajustes do App</h3>
+                    <button onclick="fecharConfiguracoes()" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <!-- Tamanho da Fonte -->
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-700">Tamanho da Letra (Acessibilidade)</label>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button onclick="mudarTamanhoFonte('sm')" class="py-1.5 border rounded-lg text-xs font-medium hover:bg-slate-50">Normal</button>
+                        <button onclick="mudarTamanhoFonte('base')" class="py-1.5 border rounded-lg text-sm font-medium hover:bg-slate-50">Grande</button>
+                        <button onclick="mudarTamanhoFonte('lg')" class="py-1.5 border rounded-lg text-base font-medium hover:bg-slate-50">Extra</button>
+                    </div>
+                </div>
+
+                <!-- Idioma -->
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-700">Idioma / Language / Idioma</label>
+                    <select id="select-idioma" onchange="mudarIdioma(this.value)" class="w-full p-2 border border-slate-200 rounded-xl text-xs bg-white">
+                        <option value="PT">Português (Brasil)</option>
+                        <option value="EN">English (US)</option>
+                        <option value="ES">Español</option>
+                    </select>
+                </div>
+
+                <button onclick="fecharConfiguracoes()" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-500">Salvar Ajustes</button>
+            </div>
+        </div>
+
+        <!-- MODAL DE AVALIAÇÃO DE LIVRO E EMPRESTADOR -->
+        <div id="review-modal" class="absolute inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white w-full max-w-xs rounded-2xl p-5 space-y-4 shadow-xl">
+                <h3 class="font-bold text-slate-800 text-sm text-center">Avaliar Devolução & Livro</h3>
+                <p id="review-book-title" class="text-xs text-center text-slate-500 font-medium"></p>
+                
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-slate-700">Nota para o Livro (1 a 5 estrelas)</label>
+                        <select id="nota-livro" class="w-full mt-1 p-2 border rounded-xl bg-white">
+                            <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
+                            <option value="4">⭐⭐⭐⭐ (Muito bom)</option>
+                            <option value="3">⭐⭐⭐ (Bom)</option>
+                            <option value="2">⭐⭐ (Regular)</option>
+                            <option value="1">⭐ (Ruim)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Avaliar o Emprestador / Leitor</label>
+                        <input type="text" id="comentario-usuario" placeholder="Ex: Muito cuidadoso e pontual!" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Comentário sobre a obra</label>
+                        <input type="text" id="comentario-livro" placeholder="Ex: História envolvente, amei ler!" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                </div>
+
+                <div class="flex space-x-2">
+                    <button onclick="fecharModalAvaliacao()" class="flex-1 py-2 border rounded-xl text-xs font-semibold">Cancelar</button>
+                    <button onclick="enviarAvaliacao()" class="flex-1 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">Enviar</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Lista completa de tags predefinidas (Expandida)
+        let todasTags = [
+            "Romance", "Ficção Científica", "Fantasia", "Suspense", "Terror", 
+            "Biografia", "História", "Tecnologia", "Programação", "Matemática", 
+            "Filosofia", "Acadêmico CETAM", "Autoajuda", "Mangá Shonen", 
+            "Mangá Seinen", "Quadrinhos Marvel/DC", "HQ Nacional", "Poesia", 
+            "Drama", "Aventura", "Mistério", "Psicologia"
+        ];
+        let tagsSelecionadas = [];
+
+        // Dados do Usuário
+        let dadosUsuario = {
+            nome: "Ana Luiza",
+            maior18: false,
+            avatar: "AL",
+            avatarImgUrl: "",
+            bannerImgUrl: "",
+            bio: "Apaixonada por leitura, tecnologia e romances clássicos. Estudante CETAM[cite: 1, 2]!"
+        };
+
+        // Banco de Dados Simulado
+        let livros = [
+            { 
+                id: 1, 
+                titulo: "Dom Casmurro", 
+                autor: "Machado de Assis", 
+                categoria: "Livros", 
+                faixa: "Livre", 
+                tags: ["Romance", "História", "Drama"], 
+                avaliacao: 4.8, 
+                status: "Disponível", 
+                doador: "Biblioteca CETAM", 
+                distancia: "0.8 km",
+                capa: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400",
+                filaEspera: [],
+                reviews: [
+                    { usuario: "Renann", nota: 5, comentario: "Clássico maravilhoso, leitura obrigatória!" },
+                    { usuario: "Loyse", nota: "4.6", comentario: "Muito bom, final surpreendente." }
+                ]
+            },
+            { 
+                id: 2, 
+                titulo: "Cálculo A - Volume 1", 
+                autor: "Hamilton J. Guimarães", 
+                categoria: "Acadêmico", 
+                faixa: "Livre", 
+                tags: ["Matemática", "Acadêmico CETAM", "Tecnologia"], 
+                avaliacao: 4.9, 
+                status: "Emprestado", 
+                doador: "Prof. Franklin", 
+                distancia: "1.2 km",
+                capa: "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=400",
+                filaEspera: ["Carlos Silva", "Julia Mendes"],
+                reviews: [
+                    { usuario: "Luiza Yane", nota: 5, comentario: "Salvou meu semestre no CETAM!" }
+                ]
+            },
+            { 
+                id: 3, 
+                titulo: "Naruto Vol. 1", 
+                autor: "Masashi Kishimoto", 
+                categoria: "Mangá", 
+                faixa: "12+", 
+                tags: ["Mangá Shonen", "Fantasia", "Aventura"], 
+                avaliacao: 5.0, 
+                status: "Disponível", 
+                doador: "Renann Teylon", 
+                distancia: "0.3 km",
+                capa: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?auto=format&fit=crop&q=80&w=400",
+                filaEspera: [],
+                reviews: [
+                    { usuario: "Ana Luiza", nota: 5, comentario: "Simplesmente perfeito!" }
+                ]
+            },
+            { 
+                id: 4, 
+                titulo: "Fundamentos de Inteligência Artificial +18", 
+                autor: "Dr. Roberto AI", 
+                categoria: "Acadêmico", 
+                faixa: "18+", 
+                tags: ["Tecnologia", "Programação", "Acadêmico CETAM", "Psicologia"], 
+                avaliacao: 4.7, 
+                status: "Disponível", 
+                doador: "Loyse Gabrielle", 
+                distancia: "2.5 km",
+                capa: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=400",
+                filaEspera: [],
+                reviews: [
+                    { usuario: "Hemily", nota: 5, comentario: "Avançado e muito completo." }
+                ]
+            }
+        ];
+
+        let meusEmprestimos = [];
+        let minhasReservas = [];
+        let historicoPrivado = [];
+        let categoriaAtual = "Todos";
+        let filtroProximidadeAtivo = false;
+        let livroAvaliadoId = null;
+
+        // Inicializar Tags no formulário de cadastro
+        function inicializarTags() {
+            const container = document.getElementById('tag-selector-container');
+            container.innerHTML = "";
+            todasTags.forEach(tag => {
+                const selecionada = tagsSelecionadas.includes(tag);
+                const classeBtn = selecionada 
+                    ? "px-2.5 py-1 rounded-lg text-[10px] font-medium border border-indigo-600 bg-indigo-50 text-indigo-700" 
+                    : "px-2.5 py-1 rounded-lg text-[10px] font-medium border border-slate-200 bg-white text-slate-600 hover:bg-slate-100";
+                const textoBtn = selecionada ? `✓ ${tag}` : `+ ${tag}`;
+
+                container.innerHTML += `
+                    <button type="button" onclick="toggleTag('${tag}')" id="tag-btn-${tag}" class="${classeBtn}">
+                        ${textoBtn}
+                    </button>
+                `;
+            });
+            document.getElementById('tag-counter').innerText = `Selecionadas: ${tagsSelecionadas.length} / 5`;
+        }
+
+        function toggleTag(tag) {
+            if(tagsSelecionadas.includes(tag)) {
+                tagsSelecionadas = tagsSelecionadas.filter(t => t !== tag);
+            } else {
+                if(tagsSelecionadas.length >= 5) {
+                    alert("Você pode selecionar no máximo 5 tags!");
+                    return;
+                }
+                tagsSelecionadas.push(tag);
+            }
+            inicializarTags();
+        }
+
+        function adicionarTagCustomizada() {
+            const input = document.getElementById('input-nova-tag');
+            const novaTag = input.value.trim();
+            if(!novaTag) return;
+
+            if(todasTags.includes(novaTag)) {
+                alert("Esta tag já existe na lista!");
+                return;
+            }
+
+            if(tagsSelecionadas.length >= 5) {
+                alert("Você já atingiu o limite de 5 tags selecionadas.");
+                return;
+            }
+
+            todasTags.push(novaTag);
+            tagsSelecionadas.push(novaTag);
+            input.value = "";
+            inicializarTags();
+        }
+
+        // Upload de Imagens Locais (Avatar, Banner, Capa)
+        function mudarAvatarArquivo(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    dadosUsuario.avatarImgUrl = e.target.result;
+                    atualizarImagensPerfil();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function mudarBannerArquivo(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    dadosUsuario.bannerImgUrl = e.target.result;
+                    document.getElementById('perfil-banner').style.backgroundImage = `url('${e.target.result}')`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function carregarCapaArquivo(event) {
+            const file = event.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('novo-capa').value = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function atualizarImagensPerfil() {
+            if(dadosUsuario.avatarImgUrl) {
+                document.getElementById('avatar-img').src = dadosUsuario.avatarImgUrl;
+                document.getElementById('avatar-img').classList.remove('hidden');
+                document.getElementById('avatar-text').classList.add('hidden');
+
+                document.getElementById('mini-avatar-img').src = dadosUsuario.avatarImgUrl;
+                document.getElementById('mini-avatar-img').classList.remove('hidden');
+                document.getElementById('mini-avatar-text').classList.add('hidden');
+            }
+        }
+
+        function fazerLogin() {
+            const user = document.getElementById('login-user').value.trim();
+            const maior18 = document.getElementById('check-maior18').checked;
+
+            if(user === "") {
+                alert("Por favor, digite seu nome de usuário.");
+                return;
+            }
+
+            dadosUsuario.nome = user;
+            dadosUsuario.maior18 = maior18;
+            dadosUsuario.avatar = user.substring(0, 2).toUpperCase();
+
+            document.getElementById('header-username').innerText = user;
+            document.getElementById('mini-avatar-text').innerText = dadosUsuario.avatar;
+            document.getElementById('perfil-nome').innerText = user;
+            document.getElementById('avatar-text').innerText = dadosUsuario.avatar;
+            document.getElementById('perfil-bio').innerText = dadosUsuario.bio;
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+
+            inicializarTags();
+            renderizarAcervo();
+        }
+
+        function sair() {
+            document.getElementById('app-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        function mudarTab(aba) {
+            ['acervo', 'emprestimos', 'chat', 'doar', 'perfil'].forEach(a => {
+                document.getElementById(`tab-${a}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${a}`);
+                if(navBtn) navBtn.className = "flex flex-col items-center text-slate-400";
+            });
+
+            document.getElementById(`tab-${aba}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${aba}`);
+            if(activeBtn) activeBtn.className = "flex flex-col items-center text-indigo-600";
+
+            if(aba === 'emprestimos') {
+                renderizarMeusEmprestimos();
+            } else if(aba === 'perfil') {
+                renderizarHistorico();
+            }
+        }
+
+        function filtrarCategoria(cat) {
+            categoriaAtual = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.className = "cat-btn px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 font-medium whitespace-nowrap";
+            });
+            event.target.className = "cat-btn px-3 py-1.5 rounded-full bg-indigo-600 text-white font-medium whitespace-nowrap shadow-sm";
+            renderizarAcervo();
+        }
+
+        function alternarProximidade() {
+            filtroProximidadeAtivo = !filtroProximidadeAtivo;
+            const btn = document.getElementById('btn-proximidade');
+            if(filtroProximidadeAtivo) {
+                btn.className = "px-3 py-2.5 bg-indigo-50 border border-indigo-300 text-indigo-700 rounded-xl text-xs font-semibold flex items-center space-x-1 shadow-sm";
+            } else {
+                btn.className = "px-3 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold flex items-center space-x-1 shadow-sm";
+            }
+            renderizarAcervo();
+        }
+
+        function renderizarAcervo() {
+            const lista = document.getElementById('lista-acervo');
+            lista.innerHTML = "";
+            const busca = document.getElementById('search-input').value.toLowerCase();
+
+            let filtrados = livros.filter(l => {
+                if(l.faixa === '18+' && !dadosUsuario.maior18) return false;
+                if(categoriaAtual !== 'Todos' && l.categoria !== categoriaAtual) return false;
+                if(filtroProximidadeAtivo && parseFloat(l.distancia) > 1.5) return false;
+
+                const matchTexto = l.titulo.toLowerCase().includes(busca) || l.autor.toLowerCase().includes(busca);
+                const matchTag = l.tags.some(t => t.toLowerCase().includes(busca));
+                return matchTexto || matchTag;
+            });
+
+            if(filtrados.length === 0) {
+                lista.innerHTML = `<p class="text-center text-slate-400 text-xs py-10">Nenhum livro encontrado com esses filtros.</p>`;
+                return;
+            }
+
+            filtrados.forEach(l => {
+                const statusColor = l.status === 'Disponível' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200';
+                const tagsHtml = l.tags.map(t => `<span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[9px]">${t}</span>`).join(' ');
+                
+                let acaoBotao = "";
+                if(l.status === 'Disponível') {
+                    acaoBotao = `<button onclick="event.stopPropagation(); solicitarEmprestimo(${l.id})" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 shadow-sm">Solicitar</button>`;
+                } else {
+                    acaoBotao = `<button onclick="event.stopPropagation(); reservarLivro(${l.id})" class="px-3 py-1.5 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-500 shadow-sm">Reservar</button>`;
+                }
+
+                lista.innerHTML += `
+                    <div onclick="abrirDetalhesLivro(${l.id})" class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex space-x-3 items-center cursor-pointer hover:border-indigo-400 transition">
+                        <img src="${l.capa}" class="w-16 h-22 object-cover rounded-xl border border-slate-100 shadow-sm" alt="Capa">
+                        <div class="flex-1 space-y-1">
+                            <div class="flex justify-between items-start">
+                                <span class="text-[9px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">${l.categoria} | ${l.faixa}</span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusColor}">${l.status}</span>
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-xs leading-tight">${l.titulo}</h4>
+                            <p class="text-[11px] text-slate-500">Autor: ${l.autor}</p>
+                            <div class="flex flex-wrap gap-1 pt-0.5">${tagsHtml}</div>
+                            <div class="flex justify-between items-center pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+                                <span><i class="fa-solid fa-star text-amber-400"></i> ${l.avaliacao} | <i class="fa-solid fa-location-dot text-indigo-500"></i> ${l.distancia}</span>
+                                ${acaoBotao}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Abrir Modal de Detalhes do Livro (Wattpad Style)
+        function abrirDetalhesLivro(id) {
+            const l = livros.find(item => item.id === id);
+            if(!l) return;
+
+            document.getElementById('modal-book-capa').src = l.capa;
+            document.getElementById('modal-book-cat').innerText = `${l.categoria} • ${l.faixa}`;
+            document.getElementById('modal-book-titulo').innerText = l.titulo;
+            document.getElementById('modal-book-autor').innerText = `Autor: ${l.autor}`;
+            document.getElementById('modal-book-doador').innerText = `Doador/Dono: ${l.doador}`;
+            document.getElementById('modal-book-nota').innerText = l.avaliacao;
+            document.getElementById('modal-book-distancia').innerText = `📍 ${l.distancia} de distância`;
+
+            // Tags
+            const tagsDiv = document.getElementById('modal-book-tags');
+            tagsDiv.innerHTML = l.tags.map(t => `<span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-[10px] font-medium">#${t}</span>`).join(' ');
+
+            // Reviews
+            const reviewsDiv = document.getElementById('modal-book-reviews');
+            reviewsDiv.innerHTML = "";
+            if(!l.reviews || l.reviews.length === 0) {
+                reviewsDiv.innerHTML = `<p class="text-slate-400 italic text-[11px]">Nenhuma avaliação para este livro ainda.</p>`;
+            } else {
+                l.reviews.forEach(r => {
+                    reviewsDiv.innerHTML += `
+                        <div class="bg-slate-50 p-2 rounded-xl border border-slate-100">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-indigo-900">${r.usuario}</span>
+                                <span class="text-amber-500 font-bold"><i class="fa-solid fa-star"></i> ${r.nota}</span>
+                            </div>
+                            <p class="text-slate-600">${r.comentario}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            // Botão de Ação no Modal
+            const btnAction = document.getElementById('modal-book-action-btn');
+            if(l.status === 'Disponível') {
+                btnAction.innerText = "Solicitar Empréstimo";
+                btnAction.className = "flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs shadow";
+                btnAction.onclick = () => { fecharDetalhesLivro(); solicitarEmprestimo(l.id); };
+            } else {
+                btnAction.innerText = "Reservar (Fila de Espera)";
+                btnAction.className = "flex-1 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold text-xs shadow";
+                btnAction.onclick = () => { fecharDetalhesLivro(); reservarLivro(l.id); };
+            }
+
+            document.getElementById('book-modal').classList.remove('hidden');
+        }
+
+        function fecharDetalhesLivro() {
+            document.getElementById('book-modal').classList.add('hidden');
+        }
+
+        function solicitarEmprestimo(id) {
+            const livro = livros.find(l => l.id === id);
+            if(livro) {
+                livro.status = "Emprestado";
+                meusEmprestimos.push(livro);
+                historicoPrivado.push({ texto: `Emprestou "${livro.titulo}"`, data: new Date().toLocaleDateString() });
+                alert(`Empréstimo de "${livro.titulo}" solicitado! Vá na aba Chat para combinar a entrega física com o doador.`);
+                renderizarAcervo();
+                mudarTab('chat');
+            }
+        }
+
+        function reservarLivro(id) {
+            const livro = livros.find(l => l.id === id);
+            if(livro) {
+                if(!livro.filaEspera.includes(dadosUsuario.nome)) {
+                    livro.filaEspera.push(dadosUsuario.nome);
+                    minhasReservas.push(livro);
+                    alert(`Você entrou na fila de espera para "${livro.titulo}". Posição atual: ${livro.filaEspera.length}`);
+                    renderizarAcervo();
+                } else {
+                    alert("Você já está na fila de espera deste livro!");
+                }
+            }
+        }
+
+        function renderizarMeusEmprestimos() {
+            const listaEmp = document.getElementById('lista-meus-emprestimos');
+            const listaRes = document.getElementById('lista-minhas-reservas');
+            listaEmp.innerHTML = "";
+            listaRes.innerHTML = "";
+
+            if(meusEmprestimos.length === 0) {
+                listaEmp.innerHTML = `<p class="text-slate-400 text-xs italic">Nenhum empréstimo ativo no momento.</p>`;
+            } else {
+                meusEmprestimos.forEach((l, index) => {
+                    listaEmp.innerHTML += `
+                        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                            <div class="flex justify-between">
+                                <h4 class="font-bold text-slate-800 text-xs">${l.titulo}</h4>
+                                <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded">Prazo: 14 dias[cite: 3, 4]</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500">Doador: ${l.doador}</p>
+                            <button onclick="devolverLivro(${index})" class="w-full py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-500">Devolver Livro & Avaliar</button>
+                        </div>
+                    `;
+                });
+            }
+
+            if(minhasReservas.length === 0) {
+                listaRes.innerHTML = `<p class="text-slate-400 text-xs italic">Nenhuma reserva ativa.</p>`;
+            } else {
+                minhasReservas.forEach(l => {
+                    const posicao = l.filaEspera.indexOf(dadosUsuario.nome) + 1;
+                    listaRes.innerHTML += `
+                        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+                            <h4 class="font-bold text-slate-800 text-xs">${l.titulo}</h4>
+                            <p class="text-[11px] text-amber-600 font-semibold"><i class="fa-solid fa-hourglass-half"></i> Sua posição na fila de espera: ${posicao}º</p>
+                            <p class="text-[10px] text-slate-400">Total na fila: ${l.filaEspera.length} usuários</p>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function devolverLivro(index) {
+            const livro = meusEmprestimos[index];
+            livroAvaliadoId = livro.id;
+            document.getElementById('review-book-title').innerText = `Livro: ${livro.titulo}`;
+            document.getElementById('review-modal').classList.remove('hidden');
+        }
+
+        function fecharModalAvaliacao() {
+            document.getElementById('review-modal').classList.add('hidden');
+        }
+
+        function enviarAvaliacao() {
+            const nota = document.getElementById('nota-livro').value;
+            const comLivro = document.getElementById('comentario-livro').value;
+            const comUsuario = document.getElementById('comentario-usuario').value;
+
+            const livro = livros.find(l => l.id === livroAvaliadoId);
+            if(livro) {
+                livro.status = "Disponível";
+                livro.avaliacao = ((parseFloat(livro.avaliacao) + parseInt(nota)) / 2).toFixed(1);
+                if(!livro.reviews) livro.reviews = [];
+                livro.reviews.push({ usuario: dadosUsuario.nome, nota: nota, comentario: comLivro || "Excelente exemplar!" });
+            }
+            meusEmprestimos = meusEmprestimos.filter(l => l.id !== livroAvaliadoId);
+
+            alert(`Avaliação enviada com sucesso! Obrigado por fortalecer a comunidade do Karasuhon[cite: 3, 4].`);
+            fecharModalAvaliacao();
+            renderizarMeusEmprestimos();
+            renderizarAcervo();
+        }
+
+        function cadastrarLivro() {
+            const titulo = document.getElementById('novo-titulo').value.trim();
+            const autor = document.getElementById('novo-autor').value.trim();
+            const categoria = document.getElementById('novo-categoria').value;
+            const faixa = document.getElementById('novo-faixa').value;
+            const capa = document.getElementById('novo-capa').value.trim() || "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=400";
+
+            if(!titulo || !autor) {
+                alert("Preencha o título e o autor do livro.");
+                return;
+            }
+            if(tagsSelecionadas.length === 0) {
+                alert("Selecione pelo menos 1 tag para o livro.");
+                return;
+            }
+
+            const novoObj = {
+                id: livros.length + 1,
+                titulo: titulo,
+                autor: autor,
+                categoria: categoria,
+                faixa: faixa,
+                tags: [...tagsSelecionadas],
+                avaliacao: 5.0,
+                status: "Disponível",
+                doador: dadosUsuario.nome,
+                distancia: "0.0 km",
+                capa: capa,
+                filaEspera: [],
+                reviews: [
+                    { usuario: dadosUsuario.nome, nota: 5, comentario: "Livro recém-cadastrado na comunidade!" }
+                ]
+            };
+
+            livros.push(novoObj);
+            historicoPrivado.push({ texto: `Cadastrou o livro "${titulo}"`, data: new Date().toLocaleDateString() });
+            alert("Livro cadastrado com sucesso no acervo comunitário!");
+
+            // Limpar formulário
+            document.getElementById('novo-titulo').value = "";
+            document.getElementById('novo-autor').value = "";
+            document.getElementById('novo-capa').value = "";
+            tagsSelecionadas = [];
+            inicializarTags();
+            mudarTab('acervo');
+        }
+
+        function renderizarHistorico() {
+            const histDiv = document.getElementById('historico-privado');
+            histDiv.innerHTML = "";
+            if(historicoPrivado.length === 0) {
+                histDiv.innerHTML = `<p class="text-slate-400 italic">Nenhuma atividade recente registrada.</p>`;
+                return;
+            }
+            historicoPrivado.forEach(h => {
+                histDiv.innerHTML += `
+                    <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span class="text-slate-700">${h.texto}</span>
+                        <span class="text-slate-400">${h.data}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function enviarMensagem() {
+            const input = document.getElementById('chat-input');
+            const msgs = document.getElementById('chat-messages');
+            if(input.value.trim() === "") return;
+
+            msgs.innerHTML += `
+                <div class="bg-indigo-50 p-2.5 rounded-xl border border-indigo-100 max-w-[80%] ml-auto shadow-sm">
+                    <p class="font-bold text-indigo-800 text-[10px]">Você:</p>
+                    <p>${input.value}</p>
+                    <span class="text-[9px] text-slate-400 block mt-1 text-right">Agora</span>
+                </div>
+            `;
+            input.value = "";
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function abrirConfiguracoes() { document.getElementById('config-modal').classList.remove('hidden'); }
+        function fecharConfiguracoes() { document.getElementById('config-modal').classList.add('hidden'); }
+
+        function mudarTamanhoFonte(tamanho) {
+            const container = document.getElementById('app-container');
+            container.classList.remove('text-sm-custom', 'text-base-custom', 'text-lg-custom');
+            container.classList.add(`text-${tamanho}-custom`);
+        }
+
+        function mudarIdioma(lang) {
+            document.getElementById('lang-indicator').innerText = lang;
+            alert(`Idioma alterado para: ${lang}`);
+        }
+
+        function editarPerfil() {
+            const novoNome = prompt("Digite seu novo nome de usuário:", dadosUsuario.nome);
+            if(novoNome !== null && novoNome.trim() !== "") {
+                dadosUsuario.nome = novoNome.trim();
+                document.getElementById('header-username').innerText = dadosUsuario.nome;
+                document.getElementById('perfil-nome').innerText = dadosUsuario.nome;
+                document.getElementById('mini-avatar-text').innerText = dadosUsuario.nome.substring(0, 2).toUpperCase();
+                document.getElementById('avatar-text').innerText = dadosUsuario.nome.substring(0, 2).toUpperCase();
+            }
+
+            const novaBio = prompt("Escreva sua bio (sua apresentação no app):", dadosUsuario.bio);
+            if(novaBio !== null) {
+                dadosUsuario.bio = novaBio;
+                document.getElementById('perfil-bio').innerText = novaBio;
+            }
+        }
+    </script>
+</body>
+</html>
